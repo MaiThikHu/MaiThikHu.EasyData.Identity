@@ -4,6 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DebugType>embedded</DebugType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>Mai Thik Hu Inc.</Authors>
+    <Description>ASP.NET Core Identity storage provider that uses EasyData as the backing store.</Description>
+    <Copyright>Copyright Mai Thik Hu Inc. 2022</Copyright>
+    <PackageProjectUrl>https://github.com/MaiThikHu/MaiThikHu.EasyData.Identity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MaiThikHu/MaiThikHu.EasyData.Identity</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>EasyData;ASP.NET;Identity</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
