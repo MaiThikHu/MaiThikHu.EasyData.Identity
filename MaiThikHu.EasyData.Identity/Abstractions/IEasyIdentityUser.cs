@@ -7,7 +7,8 @@ using MaiThikHu.EasyData.Abstractions;
 
 namespace MaiThikHu.EasyData.Identity.Abstractions
 {
-    public interface IEasyIdentityUser : IEasyEntity<string>
+    public interface IEasyIdentityUser<TKey> : IEasyEntity<TKey>
+        where TKey : IEquatable<TKey>
     {
         string UserName { get; set; }
 

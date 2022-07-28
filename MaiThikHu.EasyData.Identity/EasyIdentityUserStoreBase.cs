@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using MaiThikHu.EasyData.Abstractions;
@@ -9,13 +11,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace MaiThikHu.EasyData.Identity
 {
-    public abstract class EasyUserStoreBase<TUser> :
+    public abstract class EasyIdentityUserStoreBase<TKey, TUser> :
         IUserStore<TUser>,
+        IUserClaimStore<TUser>,
         IUserEmailStore<TUser>,
         IQueryableUserStore<TUser>
-        where TUser : class, IEasyIdentityUser
+        where TKey : IEquatable<TKey>
+        where TUser : class, IEasyIdentityUser<TKey>
     {
-        protected readonly IEasyDatabase<string> _database;
+        protected readonly IEasyDatabase<TKey> _database;
 
         #region Disposable
 
@@ -54,7 +58,7 @@ namespace MaiThikHu.EasyData.Identity
 
         public IQueryable<TUser> Users { get; }
 
-        protected EasyUserStoreBase(IEasyDatabase<string> database)
+        protected EasyIdentityUserStoreBase(IEasyDatabase<TKey> database)
         {
             _database = database;
 
@@ -70,11 +74,21 @@ namespace MaiThikHu.EasyData.Identity
             return IdentityResult.Success;
         }
 
+        public virtual TKey? ConvertIdFromString(string? id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return default(TKey);
+            }
+
+            return (TKey?)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(id);
+        }
+        
         public async Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var findResult = await _database.FindOneAsync<TUser>(e => e.Id == userId, cancellationToken: cancellationToken);
+            var findResult = await _database.FindOneAsync<TUser>(e => EqualityComparer<TKey>.Default.Equals(e.Id,ConvertIdFromString(userId)), cancellationToken: cancellationToken);
 
             if (findResult.Result)
             {
@@ -123,7 +137,7 @@ namespace MaiThikHu.EasyData.Identity
 
         public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(user.Id);
+            return Task.FromResult(user.Id.ToString()!);
         }
 
         public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
@@ -190,6 +204,31 @@ namespace MaiThikHu.EasyData.Identity
         {
             user.NormalizedEmail = normalizedEmail;
             return Task.CompletedTask;
+        }
+
+        public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }
